@@ -147,9 +147,14 @@ vdf4['meaning'] = vdf3_1.astype(str).agg(' '.join,axis=1)
 vdf4.columns = ['elu','pu','hier','verse','meaning']
 vdf4['elu'] = vdf4['elu'].str.replace('\n', ' ')
 vdf4['pu'] = vdf4['pu'].str.replace('\n',' ')
-vdf4 = vdf4[['hier','verse','meaning','elu','pu']]
+vdf4['veda'] = 'Rigveda'
+vdf4 = vdf4[['veda','hier','verse','meaning','elu','pu']]
 
+
+search = st.text_input(label='Search for keyword. Press Enter to search')
 st.dataframe(vdf4)
+
+st.markdown('Testing  \n 1s3  \n 2sg4')
 
 ## Button for downloading vedas data to CSV
 vedas_csv = convert_df(vdf4)
