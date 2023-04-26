@@ -125,5 +125,5 @@ st.dataframe(df)
 
 
 ## Button for downloading vedas data to CSV
-vedas_csv = convert_df(vdf4)
+vedas_csv = convert_df(df)
 st.download_button("Download file of all interpretations in text format", vedas_csv, "vedas.csv", "text/csv", key='download-csv')
