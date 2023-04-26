@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import streamlit as st
+import gspread
 
 
 
@@ -113,48 +114,18 @@ def kd2u(krutidev_substring):
     
     return modified_substring
 
-with open("vedas.txt", encoding='utf8') as file:
-    text = file.read()
-verses = text.split('Verse ')
-
-vdf = pd.DataFrame(verses, columns=['verse'])
-## splits within-verse on new line
-vdf2 = vdf.verse.str.split('Elucidation', expand=True)
-## drop first row, not a verse
-vdf2.drop([0], axis=0, inplace=True)
-## split column 1 on "Practical Utility" and reappend to vdf2
-vdfexp = vdf2[1].str.split('Practical Utility in life', expand=True) ## 0 is elucidation, 1 is utility
-## drop the elucidation column from vdf2
-vdf2temp = vdf2.drop([1], axis=1, inplace=False)
-## vdf3 has verses, elucidation, utility as 0,1,2 cols respectively
-vdf3 = pd.concat([vdf2temp, vdfexp], axis=1, ignore_index=True)
-vdf3.reset_index(inplace=True, drop=True)
-## splitting 0 column
-vdf3_0 = vdf3[0].str.split('\n', expand=True)
-vdf3_0 = vdf3_0.drop([1,2], axis=1).reset_index(drop=True)
-## combine verse, add to original dataframe
-## verse in English lives in columns 3-4
-vdf3['hierarchy'] = vdf3_0[0]
-vdf3['verse'] = vdf3_0[3] + ' ' + vdf3_0[4]
-## drop the long meaningless string
-vdf4 = vdf3.drop([0], axis=1, inplace=False)
-
-## combine meanings
-## drop all columns accounted for already - hierarchy and verse
-vdf3_1 = vdf3_0.drop([0,3,4], axis=1, inplace=False)
-## aggregate meanings
-vdf4['meaning'] = vdf3_1.astype(str).agg(' '.join,axis=1)
-vdf4.columns = ['elu','pu','hier','verse','meaning']
-vdf4['elu'] = vdf4['elu'].str.replace('\n', ' ')
-vdf4['pu'] = vdf4['pu'].str.replace('\n',' ')
-vdf4['veda'] = 'Rigveda'
-vdf4 = vdf4[['veda','hier','verse','meaning','elu','pu']]
-
 
 search = st.text_input(label='Search for keyword. Press Enter to search')
-st.dataframe(vdf4)
+#st.markdown('Testing  \n 1s3  \n 2sg4')
+## reading in from public google sheet
+SHEET_ID = '1pjbBPhh-v5Bo7UXeq0OOXP56XwtnzdkQnLy6GEOjdXE'
+SHEET_NAME = 'responses'
+url = f'https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={SHEET_NAME}'
+df = pd.read_csv(url)
+df.drop(['Timestamp'], axis=1, inplace=True)
+df.columns = ['Text','Hierarchy','Verse','Meaning','Elucidation','Practical Utility']
+st.dataframe(df)
 
-st.markdown('Testing  \n 1s3  \n 2sg4')
 
 ## Button for downloading vedas data to CSV
 vedas_csv = convert_df(vdf4)
