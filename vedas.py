@@ -1,9 +1,6 @@
 import numpy as np
 import pandas as pd
 import streamlit as st
-import gspread
-
-
 
 st.set_page_config(page_title='Vedas Transcription', layout="wide", initial_sidebar_state="auto", menu_items=None)
 hide_menu_style = """
