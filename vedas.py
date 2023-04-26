@@ -121,6 +121,7 @@ url = f'https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sh
 df = pd.read_csv(url)
 df.drop(['Timestamp'], axis=1, inplace=True)
 df.columns = ['Text','Hierarchy','Verse','Meaning','Elucidation','Practical Utility']
+df = df.sort_values(by=['Text','Hierarchy'])
 st.dataframe(df)
 
 
