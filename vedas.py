@@ -112,19 +112,33 @@ def kd2u(krutidev_substring):
     return modified_substring
 
 
-search = st.text_input(label='Search for keyword. Press Enter to search')
-#st.markdown('Testing  \n 1s3  \n 2sg4')
+st.markdown('# Vedas Archive and Transcription')
 ## reading in from public google sheet
 SHEET_ID = '1pjbBPhh-v5Bo7UXeq0OOXP56XwtnzdkQnLy6GEOjdXE'
 SHEET_NAME = 'responses'
 url = f'https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={SHEET_NAME}'
 df = pd.read_csv(url)
-df.drop(['Timestamp'], axis=1, inplace=True)
-df.columns = ['Text','Hierarchy','Verse','Meaning','Elucidation','Practical Utility']
-df = df.sort_values(by=['Text','Hierarchy'])
-st.dataframe(df)
+df.columns = ['Timestamp','Text','Hierarchy','Verse','Meaning','Elucidation','Practical Utility']
+df['Timestamp'] = pd.to_datetime(df['Timestamp'])
+df = df.sort_values(by=['Timestamp','Text','Hierarchy'], ascending=[False,True,True])
+dft = df.head(1)
+
+st.markdown("## Featured Verse")
+st.markdown("## {} {}".format(dft.Text.values[0], dft.Hierarchy.values[0]))
+st.text(dft.Verse.values[0])
+st.markdown("### Meaning".format(dft.Meaning.values[0]))
+st.text(dft.Meaning.values[0])
+st.markdown("### Elucidation".format(dft.Elucidation.values[0]))
+st.text(dft.Elucidation.values[0])
+st.markdown("### Practical Utility in Life")
+st.text(dft['Practical Utility'].values[0])
+
+
+search = st.text_input(label='Search for keyword. Press Enter to search')
+## show full df at bottom of page
+st.dataframe(df[['Text','Hierarchy','Verse','Meaning','Elucidation','Practical Utility']])
 
 
 ## Button for downloading vedas data to CSV
 vedas_csv = convert_df(df)
-st.download_button("Download file of all interpretations in text format", vedas_csv, "vedas.csv", "text/csv", key='download-csv')
+st.download_button("Download verses in text format", vedas_csv, "vedas.csv", "text/csv", key='download-csv')
