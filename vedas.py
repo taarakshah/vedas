@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import datetime
 import streamlit as st
 
 st.set_page_config(page_title='Vedas Transcription', layout="wide", initial_sidebar_state="auto", menu_items=None)
@@ -112,7 +113,6 @@ def kd2u(krutidev_substring):
     return modified_substring
 
 
-st.markdown('# Vedas Archive and Transcription')
 ## reading in from public google sheet
 SHEET_ID = '1pjbBPhh-v5Bo7UXeq0OOXP56XwtnzdkQnLy6GEOjdXE'
 SHEET_NAME = 'responses'
@@ -123,22 +123,46 @@ df['Timestamp'] = pd.to_datetime(df['Timestamp'])
 df = df.sort_values(by=['Timestamp','Text','Hierarchy'], ascending=[False,True,True])
 dft = df.head(1)
 
-st.markdown("## Featured Verse")
-st.markdown("## {} {}".format(dft.Text.values[0], dft.Hierarchy.values[0]))
-st.text(dft.Verse.values[0])
-st.markdown("### Meaning".format(dft.Meaning.values[0]))
-st.text(dft.Meaning.values[0])
-st.markdown("### Elucidation".format(dft.Elucidation.values[0]))
-st.text(dft.Elucidation.values[0])
+st.markdown("<h1 style='text-align: center;'>Vedas Archive and Transcription</h1>", unsafe_allow_html=True)
+
+st.markdown("## Today's Verse: {} {}".format(dft.Text.values[0], dft.Hierarchy.values[0]))
+st.write(dft.Verse.values[0])
+st.markdown("### Meaning")
+st.write(dft.Meaning.values[0])
+st.markdown("### Elucidation")
+st.write(dft.Elucidation.values[0])
 st.markdown("### Practical Utility in Life")
-st.text(dft['Practical Utility'].values[0])
+st.write(dft['Practical Utility'].values[0])
 
 
-search = st.text_input(label='Search for keyword. Press Enter to search')
+st.markdown('#### Search for Specific Verse or Keyword')
+st.write('Search for text below and the verse, meaning, elucidation, and practical utility will be shown below.')
+search = st.text_input(label='Press Enter to search', placeholder='Example: searching \'family\' will show relevant teachings')
+if search != '':
+    dfsidx = []
+    for col in df:
+        ## get indices of search for each column
+        try:
+            idx = df[df[col].str.contains(search, case=False)].index.tolist()
+            dfsidx = dfsidx + idx
+        except: pass
+    
+    dfs = df[df.index.isin(np.unique(dfsidx))].sort_index()
+
+    for label, row in dfs.iterrows():
+        with st.expander('{} {}'.format(row.Text, row.Hierarchy)):
+            st.markdown("### Verse")
+            st.write(row.Verse)
+            st.markdown("### Meaning")
+            st.write(row.Meaning)
+            st.markdown("### Elucidation")
+            st.write(row.Elucidation)
+            st.markdown("### Practical Utility")
+            st.write(row['Practical Utility'])
+
 ## show full df at bottom of page
+st.markdown('#### All Verses')
 st.dataframe(df[['Text','Hierarchy','Verse','Meaning','Elucidation','Practical Utility']])
-
-
 ## Button for downloading vedas data to CSV
 vedas_csv = convert_df(df)
-st.download_button("Download verses in text format", vedas_csv, "vedas.csv", "text/csv", key='download-csv')
+st.download_button("Download all verses in text format", vedas_csv, "vedas.csv", "text/csv", key='download-csv')
